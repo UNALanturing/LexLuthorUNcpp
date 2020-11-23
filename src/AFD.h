@@ -43,4 +43,4 @@ class AFD{
 		void setT(map<pair<int,int>,char> T){
 			table = T;
 		}
-}
+};
