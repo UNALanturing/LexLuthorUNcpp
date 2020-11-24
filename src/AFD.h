@@ -1,4 +1,4 @@
-#include <node.h>
+#include "node.h"
 class AFD{
 	public:
 		node s; //Start state
