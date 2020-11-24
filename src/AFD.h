@@ -1,11 +1,12 @@
+#include <node.h>
 class AFD{
 	public:
-		int s; //Start state
+		node s; //Start state
 		vector<int> q;//States
 		vector<char> alp;//Alphabet
 		vector<int> f;//Accepted states
-		map<pair<int,int>,char> table;//Graph
-		void build(int S, vector<int> Q, vector<char> A, vector<int> F, map<pair<int,int>,char> T){//Build function
+		vector<node> table;//Graph
+		void build(node S, vector<int> Q, vector<char> A, vector<int> F, vector<node> T){//Build function
 			s = S;
 			q = Q;
 			alp = A;
@@ -13,10 +14,10 @@ class AFD{
 			table = T;
 		}
 		//Getters and Setters
-		int getS(){
+		node getS(){
 			return s;
 		}
-		void setS(int S){
+		void setS(node S){
 			s = S;
 		}
 		vector<int> getQ(){
@@ -37,10 +38,25 @@ class AFD{
 		void setF(vector<int> F){
 			f = F;
 		}
-		map<pair<int,int>,int> getT(){
+		vector<node> getT(){
 			return table;
 		}
-		void setT(map<pair<int,int>,char> T){
+		void setT(vector<node> T){
 			table = T;
 		}
-}
+		bool isAFD(string word){
+			node u = s;//First node
+			int i=0;
+			while(1){
+				if(i == word.size()-1){//Finish the string, analize if the node is Accepted
+					return (f[u.getU()]);
+				}
+				vector<int> tran = u.getE();
+				int inx = lower_bound(alp.begin(),alp.end(),s[i])-alp.begin();
+				if(tran[inx]==-1)// -1 -> null -> There is no node
+					return 0;
+				u = q[tran[inx]];//node u goes to node tran[inx] with character 'inx' in the alphabet
+				i++;
+			}
+		}
+};
