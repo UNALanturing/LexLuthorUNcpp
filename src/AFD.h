@@ -48,7 +48,7 @@ class AFD{
 			node u = s;//First node
 			int i=0;
 			while(1){
-				if(i == word.size()-1){//Finish the string, analize if the node is Accepted
+				if(i == word.size()){//Finish the string, analize if the node is Accepted
 					return (f[u.getU()]);
 				}
 				vector<int> tran = u.getE();
