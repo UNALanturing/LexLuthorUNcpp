@@ -1,12 +1,12 @@
 #include "node.h"
 class AFD{
 	public:
-		node s; //Start state
+		Node s; //Start state
 		vector<int> q;//States
 		vector<char> alp;//Alphabet
 		vector<int> f;//Accepted states
-		vector<node> table;//Graph
-		void build(node S, vector<int> Q, vector<char> A, vector<int> F, vector<node> T){//Build function
+		vector<Node> table;//Graph
+		void build(Node S, vector<int> Q, vector<char> A, vector<int> F, vector<Node> T){//Build function
 			s = S;
 			q = Q;
 			alp = A;
@@ -14,10 +14,10 @@ class AFD{
 			table = T;
 		}
 		//Getters and Setters
-		node getS(){
+		Node getS(){
 			return s;
 		}
-		void setS(node S){
+		void setS(Node S){
 			s = S;
 		}
 		vector<int> getQ(){
@@ -38,14 +38,14 @@ class AFD{
 		void setF(vector<int> F){
 			f = F;
 		}
-		vector<node> getT(){
+		vector<Node> getT(){
 			return table;
 		}
-		void setT(vector<node> T){
+		void setT(vector<Node> T){
 			table = T;
 		}
 		bool isAFD(string word){
-			node u = s;//First node
+			Node u = s;//First node
 			int i=0;
 			while(1){
 				if(i == word.size()){//Finish the string, analize if the node is Accepted
