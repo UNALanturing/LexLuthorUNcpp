@@ -55,7 +55,7 @@ class AFD{
 				int inx = lower_bound(alp.begin(),alp.end(),s[i])-alp.begin();
 				if(tran[inx]==-1)// -1 -> null -> There is no node
 					return 0;
-				u = q[tran[inx]];//node u goes to node tran[inx] with character 'inx' in the alphabet
+				u = table[tran[inx]];//node u goes to node tran[inx] with character 'inx' in the alphabet
 				i++;
 			}
 		}
