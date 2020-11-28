@@ -1,12 +1,11 @@
-#include "node.h"
 class AFD{
 	public:
-		Node s; //Start state
-		vector<int> q;//States
+		int s; //Start state -- > int
+		int q;//States --> int
 		vector<char> alp;//Alphabet
 		vector<int> f;//Accepted states
-		vector<Node> table;//Graph
-		void build(Node S, vector<int> Q, vector<char> A, vector<int> F, vector<Node> T){//Build function
+		vector<vector<int>> table;//Graph --> vv
+		void build(int S, int Q, vector<char> A, vector<int> F, vector<vector<int>> T){//Build function
 			s = S;
 			q = Q;
 			alp = A;
@@ -14,16 +13,16 @@ class AFD{
 			table = T;
 		}
 		//Getters and Setters
-		Node getS(){
+		int getS(){
 			return s;
 		}
 		void setS(Node S){
 			s = S;
 		}
-		vector<int> getQ(){
+		int getQ(){
 			return q;
 		}
-		void setQ(vector<int> Q){
+		void setQ(int Q){
 			q = Q;
 		}
 		vector<char> getA(){
@@ -38,13 +37,13 @@ class AFD{
 		void setF(vector<int> F){
 			f = F;
 		}
-		vector<Node> getT(){
+		vector<vector<int>> getT(){
 			return table;
 		}
-		void setT(vector<Node> T){
+		void setT(vector<vector<int>> T){
 			table = T;
 		}
-		bool isAFD(string word){
+		bool isAFD(string word){//Have to be changed, but not today XD, srry Scrum Master :(
 			Node u = s;//First node
 			int i=0;
 			while(1){
