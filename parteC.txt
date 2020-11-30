@@ -1,0 +1,7 @@
+%{
+*****PARTE EN C*****
+#include <stdio.h>
+#include <string.h>
+#include "test.tab.h"
+void showError();
+%}
