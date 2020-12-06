@@ -63,7 +63,6 @@ int main() {
 		int n = s.size();
 		vector < pair<string, int> > st;
 		for (int i = 0; i < n; ++i) {
-			cout<< s[i] << endl;
 			//New expression, list or string
 			if (s[i] == '(') {
 				ans += "(";
@@ -73,7 +72,10 @@ int main() {
 				st.push_back({"", 2});
 			} else if (s[i] == '"') {
 				if (st.size() && st.back().second == 3) {
-					if (!change(i, n, s)) st.pop_back();
+					if (!change(i, n, s)) {
+						ans += st.back().first;
+						st.pop_back();
+					}
 				} else {
 					ans += "(";
 					st.push_back({"", 3});
@@ -91,7 +93,7 @@ int main() {
 					if (s[i] == '?') {
 						if (!i || ans.empty() || st.empty()) imp();
 						if (st.size()) {
-							ans += lambda + "|" + st.back().first + ")";
+							ans += st.back().first + "|" + lambda + ")";
 							st.pop_back();
 						} else {
 							char c = ans.back();
@@ -120,7 +122,8 @@ int main() {
 					} else {
 						if (st.size()) {
 							if (st.back().second == 2) {
-								st.back().first += '|';
+								if (i != 0 && s[i - 1] != '[')
+									st.back().first += '|';
 								st.back().first += s[i];
 							} else st.back().first += s[i];
 						} else ans += s[i];
@@ -128,9 +131,9 @@ int main() {
 				}
 			}
 		}
+		cout << li.first << ' ' << ans << endl;
 		li.second = ans;
 	}
-	for (auto li : exp) cout << li.first << ' ' << li.second << endl;
 	return 0;
 }
 
