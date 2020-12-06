@@ -6,6 +6,8 @@
 void showError();
 %}
 
+try      ([0-9])?
+string      "abc"([0-9])*
 numbers     ([0-9])+
 alpha       ([a-zA-Z])+
 
