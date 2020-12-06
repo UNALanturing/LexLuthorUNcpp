@@ -9,16 +9,21 @@ using namespace std;
 struct Node{
   public:
     char simbol;
-    Node *left;
-    Node *right;
+    Node *left = NULL;
+    Node *right = NULL;
     int index;
     set<int> firstpos;
     set<int> lastpos;
     set<int> followpos;
+    bool isNull = false;
     bool nullable;
     bool nullable_computed = false;
     bool firstpos_computed = false;
     bool lastpos_computed = false;
+    Node(){
+    	isNull = true;
+    };
+
     Node(char s, Node *l, Node *r){
       simbol = s;
       left = l;
@@ -30,24 +35,15 @@ struct Node{
       left = l;
     };
 
-    Node(char s){
+    Node(char s, int ind){
       simbol = s;
+      index = ind;
     };
+
+    
 };
 
-void printInOrder(Node &n){
-  if(n.simbol == '*'){
-    cout << '(';
-    printInOrder(*n.left);
-    cout << ')' << n.simbol; 
-  }else if(n.simbol == CONCAT || n.simbol == '|'){
-    printInOrder(*n.left);
-    if(n.simbol != CONCAT) cout << n.simbol;
-    printInOrder(*n.right);
-  }else{
-    cout << n.simbol;
-  }
-};
+
 
 
 bool nullable(Node &n){
@@ -185,7 +181,7 @@ class AFD{
 				}
 				
 			}
-			/*
+			
 			cout <<"states: " << '\n';
 			for(string state : dstates){
 				cout << state << '\n';
@@ -194,7 +190,7 @@ class AFD{
 			for(auto transition : dtran){
 				cout << "(" << get<0>(transition) << " , " << get<1>(transition) << " )  --> " << get<2>(transition) << '\n'; 
 			}
-			*/
+			
 			//establecemos el numero total de estados
 			num_states = dstates.size();
 			
@@ -269,24 +265,93 @@ class AFD{
 		};
 };
 
+
+
+Node* parseRegex(string regex){
+	stack<Node*> s;
+	Node* root = NULL;
+	int leaf_index = 1;
+	try{
+		for(int i = 0; i<regex.length(); i++){
+			if(regex[i] == '('){
+				if(root == NULL || regex[i-1] == '(') s.push(NULL);
+				else if(regex[i-1] == '|') s.push(new Node('|', root));
+				else s.push(new Node(CONCAT, root));
+				root = NULL;			
+			}else if(regex[i] == ')'){
+				if(s.empty()) throw i;
+				Node* snode = s.top();
+				s.pop();
+				if(snode == NULL);
+				else{
+					snode -> right = root;
+					root = snode;
+				}
+			}else if(regex[i] == '*'){
+				if(root == NULL) throw i;
+				if(root -> simbol == '*');
+				else if(root -> simbol == '|' || root -> simbol == CONCAT){
+					if(regex[i-1] == ')') root = new Node('*', root);
+					else{
+						root -> right = new Node('*', root -> right);
+					}
+				}
+			}else if(regex[i] == '|'){
+				if(root == NULL) throw i;
+				else if(regex[i-1] != '|'){
+					root = new Node('|', root);
+				}else throw i;
+			}else{
+				if(root == NULL) root = new Node(regex[i], leaf_index++);
+				else if(regex[i-1] != '|') root = new Node(CONCAT, root, new Node(regex[i], leaf_index++));
+				else root -> right = new Node(regex[i], leaf_index++);
+			}	
+		}
+		if(!s.empty()) throw (int) regex.length();
+	}catch(int e){
+		cout << "Error parsing " << regex << " at index " << e << '\n';
+	}
+	return root;
+};
+
+void printInOrder(struct Node* root){
+	if(root == NULL) return;
+	else if(root -> simbol == CONCAT || root -> simbol == '|' || root -> simbol == '*'){
+		cout << "("; printInOrder(root -> left); cout << ")";
+		if(root -> simbol != CONCAT) cout << root -> simbol;
+		if(root -> simbol == '|' || root -> simbol == CONCAT) cout << "("; printInOrder(root -> right); cout << ")";
+	}else{
+		cout << root -> simbol;
+	}
+};
+
 int main(){
-  //Arbol sintactico del ejemplo 3.56 del libro de Aho
-  //Hojas
-  Node h1('a'); h1.index = 1;
-  Node h2('b'); h2.index = 2;
-  Node h3('a'); h3.index = 3;
-  Node h4('b'); h4.index = 4;
-  Node h5('b'); h5.index = 5;
-  Node h6('#'); h6.index = 6;
-  //Nodos internos
-  Node n7('|',&h1,&h2); n7.index = 7;
-  Node n8('*',&n7); n8.index = 8;
-  Node n9(CONCAT,&n8, &h3); n9.index = 9;
-  Node n10(CONCAT,&n9,&h4); n10.index = 10;
-  Node n11(CONCAT,&n10,&h5); n11.index = 11;
-  Node root(CONCAT,&n11,&h6); root.index = 12;
-  //printInOrder(root);
-  AFD automata(root);
-  automata.info();
-  return 0;
+	
+	//Arbol sintactico del ejemplo 3.56 del libro de Aho
+	//Hojas
+	Node h1('a',1);
+	Node h2('b',2);
+	Node h3('a',3);
+	Node h4('b',4);
+	Node h5('b',5);
+	Node h6('#',6);
+	//Nodos internos
+	Node n7('|',&h1,&h2);
+	Node n8('*',&n7);
+	Node n9(CONCAT,&n8, &h3);
+	Node n10(CONCAT,&n9,&h4);
+	Node n11(CONCAT,&n10,&h5);
+	Node root(CONCAT,&n11,&h6);
+	printInOrder(&root);
+	cout << '\n';
+	/*
+	AFD automata(root);
+	automata.info();
+	*/
+	Node* root1 = parseRegex("(a|b)*abb#");
+	//Node* root = new Node('|', new Node('a',1), new Node('b',2));
+	//cout << p -> right -> simbol << '\n';
+	printInOrder(root1);
+	cout << '\n';
+	return 0;
 }
