@@ -1,3 +1,6 @@
+#include <bits/stdc++.h>
+
+using namespace std;
 class AFD{
 	public:
 		int s; //Start state -- > int
@@ -5,7 +8,7 @@ class AFD{
 		vector<char> alp;//Alphabet <-- is ordered
 		vector<int> f;//Accepted states
 		vector<vector<int>> table;//Graph --> vv
-		void build(int S, int Q, vector<char> A, vector<int> F, vector<vector<int>> T){//Build function
+		AFD(int S, int Q, vector<char> A, vector<int> F, vector<vector<int>> T){//Build function
 			s = S;
 			q = Q;
 			alp = A;
