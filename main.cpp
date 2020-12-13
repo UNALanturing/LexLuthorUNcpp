@@ -4,6 +4,84 @@ using namespace std;
 const string lambda = "~";
 void imp() {cout << "You've made a mistake sir / ma'am" << endl; exit(0);}
 bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$'); }
+string solve(pair<string,string> li){
+	string ans = "", s = li.second, last = "";
+	int n = s.size();
+	vector < pair<string, int> > st;
+	for (int i = 0; i < n; ++i) {
+		//New expression, list or string
+		if (s[i] == '(') {
+			ans += "(";
+			st.push_back({"", 1});
+		} else if (s[i] == '[') {
+			ans += "(";
+			st.push_back({"", 2});
+		} else if (s[i] == '"') {
+			if (st.size() && st.back().second == 3) {
+				if (!change(i, n, s)) {
+					ans += st.back().first;
+					st.pop_back();
+				}
+			} else {
+				ans += "(";
+				st.push_back({"", 3});
+			}
+		} else {
+			// Ending of an expression or list
+			if (s[i] == ')' || s[i] == ']') {
+				if (st.empty()) imp();
+				if (!change(i, n, s)) {
+					ans += st.back().first + ")";
+					st.pop_back();
+				}
+			} else {
+				//Current element in an operator
+				if (s[i] == '?') {
+					if (!i || ans.empty() || st.empty()) imp();
+					if (st.size()) {
+						ans += st.back().first + "|" + lambda + ")";
+						st.pop_back();
+					} else {
+						char c = ans.back();
+						ans += "(" + lambda + "|" + c + ")";
+					}
+				} else if (s[i] == '$') {
+					if (!i || ans.empty() || st.empty()) imp();
+					if (st.size()) {
+						last = st.back().first;
+						st.pop_back();
+					} else last = ans.back();
+				} else if (s[i] == '-') {
+					if (i == 0 || i + 1 >= n) imp();
+					if (st.size()) {
+						if(s[i-1]>s[i+1])imp();
+						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
+							st.back().first += '|';
+							st.back().first += c;
+						}
+					} else {
+						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
+							ans += '|';
+							ans += c;
+						}
+					}
+					i++;
+				} else {
+					if (st.size()) {
+						if (st.back().second == 2) {
+							if (i != 0 && s[i - 1] != '[')
+								st.back().first += '|';
+							st.back().first += s[i];
+						} else st.back().first += s[i];
+					} else ans += s[i];
+				}
+			}
+		}
+	}
+	cout << li.first << ' ' << ans << endl;
+	li.second = ans;
+	return ans;
+}
 int main() {
 	freopen("input.txt", "r", stdin);
 	freopen("parteC.txt", "w", stdout);
@@ -59,81 +137,8 @@ int main() {
 		 * 2: in a list []
 		 * 3: in a string ""
 		 */
-		string ans = "", s = li.second, last = "";
-		int n = s.size();
-		vector < pair<string, int> > st;
-		for (int i = 0; i < n; ++i) {
-			//New expression, list or string
-			if (s[i] == '(') {
-				ans += "(";
-				st.push_back({"", 1});
-			} else if (s[i] == '[') {
-				ans += "(";
-				st.push_back({"", 2});
-			} else if (s[i] == '"') {
-				if (st.size() && st.back().second == 3) {
-					if (!change(i, n, s)) {
-						ans += st.back().first;
-						st.pop_back();
-					}
-				} else {
-					ans += "(";
-					st.push_back({"", 3});
-				}
-			} else {
-				// Ending of an expression or list
-				if (s[i] == ')' || s[i] == ']') {
-					if (st.empty()) imp();
-					if (!change(i, n, s)) {
-						ans += st.back().first + ")";
-						st.pop_back();
-					}
-				} else {
-					//Current element in an operator
-					if (s[i] == '?') {
-						if (!i || ans.empty() || st.empty()) imp();
-						if (st.size()) {
-							ans += st.back().first + "|" + lambda + ")";
-							st.pop_back();
-						} else {
-							char c = ans.back();
-							ans += "(" + lambda + "|" + c + ")";
-						}
-					} else if (s[i] == '$') {
-						if (!i || ans.empty() || st.empty()) imp();
-						if (st.size()) {
-							last = st.back().first;
-							st.pop_back();
-						} else last = ans.back();
-					} else if (s[i] == '-') {
-						if (i == 0 || i + 1 >= n) imp();
-						if (st.size()) {
-							if(s[i-1]>s[i+1])imp();
-							for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
-								st.back().first += '|';
-								st.back().first += c;
-							}
-						} else {
-							for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
-								ans += '|';
-								ans += c;
-							}
-						}
-						i++;
-					} else {
-						if (st.size()) {
-							if (st.back().second == 2) {
-								if (i != 0 && s[i - 1] != '[')
-									st.back().first += '|';
-								st.back().first += s[i];
-							} else st.back().first += s[i];
-						} else ans += s[i];
-					}
-				}
-			}
-		}
-		cout << li.first << ' ' << ans << endl;
-		li.second = ans;
+		string res = solve(li.second);
+		li.second = res;
 	}
 	return 0;
 }
