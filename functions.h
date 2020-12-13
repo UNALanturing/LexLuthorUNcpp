@@ -1,54 +1,40 @@
 #include<bits/stdc++.h>
-#define LAMBDA '~'
-#define CONCAT '`'
-
-
-
 using namespace std;
+
+const char LAMBDA = '~';
+const char CONCAT = '`';
 
 struct Node{
   public:
     char simbol;
-    Node *left;
-    Node *right;
+    Node *left = NULL;
+    Node *right = NULL;
     int index;
     set<int> firstpos;
     set<int> lastpos;
     set<int> followpos;
+    bool isNull = false;
     bool nullable;
     bool nullable_computed = false;
     bool firstpos_computed = false;
     bool lastpos_computed = false;
+    Node(){
+    	isNull = true;
+    };
     Node(char s, Node *l, Node *r){
       simbol = s;
       left = l;
       right = r;
     };
-
     Node(char s, Node *l){
       simbol = s;
       left = l;
     };
-
-    Node(char s){
+    Node(char s, int ind){
       simbol = s;
+      index = ind;
     };
 };
-
-void printInOrder(Node &n){
-  if(n.simbol == '*'){
-    cout << '(';
-    printInOrder(*n.left);
-    cout << ')' << n.simbol; 
-  }else if(n.simbol == CONCAT || n.simbol == '|'){
-    printInOrder(*n.left);
-    if(n.simbol != CONCAT) cout << n.simbol;
-    printInOrder(*n.right);
-  }else{
-    cout << n.simbol;
-  }
-};
-
 
 bool nullable(Node &n){
   if(n.nullable_computed) return n.nullable;
@@ -59,7 +45,6 @@ bool nullable(Node &n){
   n.nullable_computed = true;
   return n.nullable;
 };
-
 
 set<int> unir(set<int> s1, set<int> s2){
 	vector<int> v1(s1.begin(),s1.end());
@@ -103,8 +88,7 @@ void computeFirstAndLastpos(Node &n){
   lastpos(n);
 };
 
-
-//FunciÃ³n auxiliar de la funcion followpos para insertar una posicion dentro del conjunto followpos de una hoja con indice index.
+//Función auxiliar de la funcion followpos para insertar una posicion dentro del conjunto followpos de una hoja con indice index.
 void insertFollowpos(Node &n, int index, set<int> numeros){
   if(n.simbol == CONCAT || n.simbol == '|' || n.simbol == '*' ){
     insertFollowpos(*n.left, index, numeros);
@@ -148,10 +132,11 @@ class AFD{
 		int initial_state;
 		int num_states;
 		set<char> alfabeto;
-		int **transitions;//matriz de transicion
+		vector<char> alp;//Alphabet <-- is ordered
+		vector< vector<int> > transitions;//matriz de transicion
 		set<int> final_states;//estados de aceptacion
+		vector<int> f;//Accepted states
 		unordered_map<char,int> number_simbol;//Dicionario que asocia cada simbolo del alfabeto con su numero correspondiente en la matriz de transicion
-
 		//Constructor que implementa el algoritmo 1 de la seccion 3.9 libro de Aho
 		AFD(Node &root){
 			nullable(root);
@@ -210,20 +195,27 @@ class AFD{
 			i=0;
 			for(char a : alfabeto){
 				number_simbol[a] = i;
+				alp.push_back(a);
 				i++;
 			}
-
 			//establecemos el estado inicial
 			initial_state = number_state[setToString(root.firstpos)];
-			
 			//establecemos los estados de aceptacion
 			for(string s : fstates) final_states.insert(number_state[s]);
-
+			for(int i=0; i<num_states; i++){
+				f.push_back(final_states.count(i));
+			}
 			//inicializamos la matriz de transicion
 			int num_simbols = alfabeto.size();
+			/*
 			transitions = new int*[num_states];
 			for(int i=0; i<num_states;i ++){
 				transitions[i] = new int[num_simbols];
+			}
+			*/
+			for(int i=0; i<num_states; i++){
+				vector<int> aux(num_simbols,-1);
+				transitions.push_back(aux);
 			}
 			//inicializamos todas las transiciones en -1 
 			for(i=0; i<num_states;i++){
@@ -237,7 +229,6 @@ class AFD{
 			}
 
 		};
-
 		//Funcion auxiliar para obtener la informacion de las hojas del arbol sintactico usadas en el constructor.
 		void leaves(Node &n, unordered_map<int, set<int>> &flp, unordered_map<int, char> &lc, int &lv){
 			if(n.simbol == CONCAT || n.simbol == '|'){ leaves(*n.left,flp,lc,lv); leaves(*n.right,flp,lc,lv);}
@@ -249,7 +240,23 @@ class AFD{
 				else lv = n.index;
 			} 
 		};
+		AFD(int s, int q, vector<char> alph, vector<int> fs, vector< vector<int> > table){
+			initial_state = s;
+			num_states = q;
+			alp = alph;
+			alfabeto = set<char>(alp.begin(), alp.end());
+			f = fs;
+			final_states = set<int>(f.begin(), f.end());
+			transitions = table;
+		}
+		//Procesar string
+		/*
+		bool procesarString(string word){
+			for(char c : word){
 
+			}
+		};
+		*/
 		//Imprimir informacion del automata:
 		void info(){
 			cout << "Alfabeto: \n{";
@@ -257,7 +264,9 @@ class AFD{
 			cout << "}\nNumero de estados: " << num_states << '\n';
 			cout << "Estado inicial: " << initial_state << '\n';
 			cout << "Estados de aceptacion: " << "\n{";
-			for(int x : final_states) cout << x << " ";
+			for(int x : f) cout << x << " ";
+			cout << "}\n{";
+			for(int x : f) cout << x << " ";
 			cout << "}\nMatriz de transicion: " << '\n';
 
 			for(int i=0; i<num_states; i++){
@@ -269,24 +278,106 @@ class AFD{
 		};
 };
 
-int main(){
-  //Arbol sintactico del ejemplo 3.56 del libro de Aho
-  //Hojas
-  Node h1('a'); h1.index = 1;
-  Node h2('b'); h2.index = 2;
-  Node h3('a'); h3.index = 3;
-  Node h4('b'); h4.index = 4;
-  Node h5('b'); h5.index = 5;
-  Node h6('#'); h6.index = 6;
-  //Nodos internos
-  Node n7('|',&h1,&h2); n7.index = 7;
-  Node n8('*',&n7); n8.index = 8;
-  Node n9(CONCAT,&n8, &h3); n9.index = 9;
-  Node n10(CONCAT,&n9,&h4); n10.index = 10;
-  Node n11(CONCAT,&n10,&h5); n11.index = 11;
-  Node root(CONCAT,&n11,&h6); root.index = 12;
-  //printInOrder(root);
-  AFD automata(root);
-  automata.info();
-  return 0;
+AFD minAFD(AFD aut) {
+	int n = aut.num_states; //number of nodes in the original automaton
+	vector <int> father(n, -1); //Representative node of each partition
+	map <int, vector <int> > pi; //Current partitions (1 acceptance and 0 non acceptance)
+	vector <int> aux (2, -1);
+	for (int i = 0; i < n; ++i) {
+		if (aux[aut.f[i]] == -1) aux[aut.f[i]] = i;
+	}
+	for (int i = 0; i < n; ++i) {
+		pi[aux[aut.f[i]]].push_back(i);
+		father[i] = aux[aut.f[i]];
+	}
+	while (1) { //While there are new partitions
+		map < int, vector <int>> newPar; //Every new partition formed
+		vector < vector <int> > tran (n, vector <int> (aut.alp.size())); //transition to representative node
+		for (auto g: pi) { //for each group G in PI (current paritition)
+			map <vector <int> , vector <int> > curPar;//Transitions for the current partition (in order to not merge partitions)
+			for (int s : g.second) { // for every node in group G
+				for (int i = 0; i < aut.alp.size(); ++i) { //check transition with every char in alphabet
+					tran[s][i] = father[aut.transitions[s][i]]; 
+				}
+				curPar[tran[s]].push_back(s);
+			}
+			for (auto cp : curPar) {
+				newPar[cp.second[0]] = cp.second;
+				for (int i : cp.second) father[i] = cp.second[0];
+			}
+		}
+		if (newPar == pi) break;
+		pi = newPar;
+	}
+	//PI contains all groups of equivalent states
+	int s = father[aut.initial_state]; //New initial state is the representative node of initial state's group
+	int q = pi.size(); //Size of PI equals number of minimum states
+	vector <int> f(q, 0);//New vector of acceptance states
+	for (int i = 0; i < q; ++i) f[i] = aut.f[father[i]]; //Acceptance states remin as accepted states
+	vector < vector <int> > table(q, vector <int> (aut.alp.size())); //New table of transitions
+	int idx = 0; //current state's index
+	for (auto s : pi) { //
+		for (int i = 0; i < aut.alp.size(); ++i) { //Adding new transitions;
+			table[idx][i] = father[aut.transitions[s.first][i]];
+		}
+		idx++;
+	}
+	return AFD(s, q, aut.alp, f, table); //Return new minimum states automaton
 }
+Node* parseRegex(string regex){
+	stack<Node*> s;
+	Node* root = NULL;
+	int leaf_index = 1;
+	try{
+		for(int i = 0; i<regex.length(); i++){
+			if(regex[i] == '('){
+				if(root == NULL || regex[i-1] == '(') s.push(NULL);
+				else if(regex[i-1] == '|') s.push(new Node('|', root));
+				else s.push(new Node(CONCAT, root));
+				root = NULL;			
+			}else if(regex[i] == ')'){
+				if(s.empty()) throw i;
+				Node* snode = s.top();
+				s.pop();
+				if(snode == NULL);
+				else{
+					snode -> right = root;
+					root = snode;
+				}
+			}else if(regex[i] == '*'){
+				if(root == NULL) throw i;
+				if(root -> simbol == '*');
+				else if(root -> simbol == '|' || root -> simbol == CONCAT){
+					if(regex[i-1] == ')') root = new Node('*', root);
+					else{
+						root -> right = new Node('*', root -> right);
+					}
+				}
+			}else if(regex[i] == '|'){
+				if(root == NULL) throw i;
+				else if(regex[i-1] != '|'){
+					root = new Node('|', root);
+				}else throw i;
+			}else{
+				if(root == NULL) root = new Node(regex[i], leaf_index++);
+				else if(regex[i-1] != '|') root = new Node(CONCAT, root, new Node(regex[i], leaf_index++));
+				else root -> right = new Node(regex[i], leaf_index++);
+			}	
+		}
+		if(!s.empty()) throw (int) regex.length();
+	}catch(int e){
+		cout << "Error parsing " << regex << " at index " << e << '\n';
+	}
+	return root;
+};
+
+void printInOrder(struct Node* root){
+	if(root == NULL) return;
+	else if(root -> simbol == CONCAT || root -> simbol == '|' || root -> simbol == '*'){
+		cout << "("; printInOrder(root -> left); cout << ")";
+		if(root -> simbol != CONCAT) cout << root -> simbol;
+		if(root -> simbol == '|' || root -> simbol == CONCAT) cout << "("; printInOrder(root -> right); cout << ")";
+	}else{
+		cout << root -> simbol;
+	}
+};

@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
+#include "functions.h"
 using namespace std;
 
-const string lambda = "~";
 void imp() {cout << "You've made a mistake sir / ma'am" << endl; exit(0);}
 bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$'); }
 int main() {
@@ -93,11 +93,13 @@ int main() {
 					if (s[i] == '?') {
 						if (!i || ans.empty() || st.empty()) imp();
 						if (st.size()) {
-							ans += st.back().first + "|" + lambda + ")";
+							ans += st.back().first + "|" + LAMBDA+ ")";
 							st.pop_back();
 						} else {
 							char c = ans.back();
-							ans += "(" + lambda + "|" + c + ")";
+							ans += "(" ;
+							ans += LAMBDA + "|";
+							ans += c + ")";
 						}
 					} else if (s[i] == '$') {
 						if (!i || ans.empty() || st.empty()) imp();
@@ -134,6 +136,35 @@ int main() {
 		cout << li.first << ' ' << ans << endl;
 		li.second = ans;
 	}
+
+	//Arbol sintactico del ejemplo 3.56 del libro de Aho
+	//Hojas
+	Node h1('a',1);
+	Node h2('b',2);
+	Node h3('a',3);
+	Node h4('b',4);
+	Node h5('b',5);
+	Node h6('#',6);
+	//Nodos internos
+	Node n7('|',&h1,&h2);
+	Node n8('*',&n7);
+	Node n9(CONCAT,&n8, &h3);
+	Node n10(CONCAT,&n9,&h4);
+	Node n11(CONCAT,&n10,&h5);
+	Node root(CONCAT,&n11,&h6);
+	printInOrder(&root);
+	cout << '\n';
+	
+	AFD automata(root);
+	automata.info();
+	automata = minAFD(automata);
+	automata.info();
+	//cout << automata.procesarString("aab#") << '\n';
+	//Node* root1 = parseRegex("(a|b)*abb#");
+	//Node* root = new Node('|', new Node('a',1), new Node('b',2));
+	//cout << p -> right -> simbol << '\n';
+	//printInOrder(root1);
+	cout << '\n';
 	return 0;
 }
 
