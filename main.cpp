@@ -108,6 +108,7 @@ int main() {
 					} else if (s[i] == '-') {
 						if (i == 0 || i + 1 >= n) imp();
 						if (st.size()) {
+							if(s[i-1]>s[i+1])imp();
 							for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
 								st.back().first += '|';
 								st.back().first += c;
