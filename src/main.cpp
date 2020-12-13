@@ -4,9 +4,13 @@ using namespace std;
 
 void imp() {cout << "You've made a mistake sir / ma'am" << endl; exit(0);}
 bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$'); }
+bool isOperator(char c){
+	return (c == '?' or c == '+' or c == '-' or c == '*' or c == '/' or c=='=' or c=='&' or c=='^' or c=='|');
+}
 string solve(pair<string,string> li){
 	string ans = "", s = li.second, last = "";
 	int n = s.size();
+	int inStr = 0;
 	vector < pair<string, int> > st;
 	for (int i = 0; i < n; ++i) {
 		//New expression, list or string
@@ -25,9 +29,38 @@ string solve(pair<string,string> li){
 			} else {
 				ans += "(";
 				st.push_back({"", 3});
+				inStr = 1;
 			}
 		} else {
 			// Ending of an expression or list
+			if(inStr && isOperator(s[i])){
+				string aux = "";
+				aux.push_back('\');
+				aux.push_back(s[i]);
+				ans += aux;
+				continue;
+			}
+			if(s[i] == '+'){
+				char aux = ans.back();
+				if(aux != ')'){
+					ans += aux + "*";
+				}else{
+					int cnt = 1;
+					int inx = 0;
+					if(i-2 < 0) imp();
+					for(int j=i-2; j>=0; j--){
+						if(ans[j] == ')')cnt++;
+						else if(ans[j] == '(')cnt--;
+						if(cnt == 0){
+							inx = j;
+							break;
+						}
+					}
+					string t = ans.substr(inx,i-1-inx+1);
+					ans += t+"*";
+				}
+				continue;
+			}
 			if (s[i] == ')' || s[i] == ']') {
 				if (st.empty()) imp();
 				if (!change(i, n, s)) {
