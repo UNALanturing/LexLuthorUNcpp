@@ -3,9 +3,9 @@
 using namespace std;
 
 void imp() {cout << "You've made a mistake sir / ma'am" << endl; exit(0);}
-bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$'); }
+bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$' || s[i + 1] == '+'); }
 bool isOperator(char c){
-	return (c == '?' or c == '+' or c == '-' or c == '*' or c == '/' or c=='=' or c=='&' or c=='^' or c=='|');
+	return (c == '?'  or c == '-' or c == '*' or c == '/' or c=='=' or c=='&' or c=='^' or c=='|');
 }
 string solve(pair<string,string> li){
 	string ans = "", s = li.second, last = "";
@@ -35,11 +35,12 @@ string solve(pair<string,string> li){
 			// Ending of an expression or list
 			if(inStr && isOperator(s[i])){
 				string aux = "";
-				aux.push_back('\');
+				aux.push_back('\\');
 				aux.push_back(s[i]);
 				ans += aux;
 				continue;
 			}
+			/*
 			if(s[i] == '+'){
 				char aux = ans.back();
 				if(aux != ')'){
@@ -60,7 +61,7 @@ string solve(pair<string,string> li){
 					ans += t+"*";
 				}
 				continue;
-			}
+			}*/
 			if (s[i] == ')' || s[i] == ']') {
 				if (st.empty()) imp();
 				if (!change(i, n, s)) {
@@ -100,6 +101,16 @@ string solve(pair<string,string> li){
 						}
 					}
 					i++;
+				}  else if (s[i] == '+') {
+					if (!st.empty()) {
+						ans += "(" + st.back().first + ")*(" + st.back().first + "))";
+						st.pop_back();
+					} else {
+						char c = ans.back();
+						ans += "(" + c; 
+						ans += ")*(" + c; 
+						ans += "))";
+					}
 				} else {
 					if (st.size()) {
 						if (st.back().second == 2) {
@@ -112,11 +123,11 @@ string solve(pair<string,string> li){
 			}
 		}
 	}
-	cout << li.first << ' ' << ans << endl;
 	li.second = ans;
 	return ans;
 }
 int main() {
+	/*
 	freopen("input.txt", "r", stdin);
 	freopen("parteC.txt", "w", stdout);
 	map <string, string> exp;
@@ -131,8 +142,8 @@ int main() {
 				if (token != 1) {
 					if (s[i] == '%' && s[i + 1] == '}') { //End of first section
 						token = 1; 
-						fclose(stdout);
-						freopen("funcionesC.txt.", "w", stdout);
+						fclose(stdout); //closes current stream
+						freopen("funcionesC.txt.", "w", stdout);//Opens new stream
 						break; 
 					}
 				} 
@@ -161,20 +172,21 @@ int main() {
 			if (!exp.count(ti)) exp[ti] = ri; //Saves the current lexeme and its regular expression
 		}
 	}
+	*/
 	//fclose(stdout);
 	//Converts Regular extension to regular expension, in order to further process using automatons
 	//cout << "IN" << endl;
-	for (auto &li : exp) {//For each Lexeme saved
+	//for (auto &li : exp) {//For each Lexeme saved
 		/* Cur states
 		 * 0: just a char
 		 * 1: in a expression ()
 		 * 2: in a list []
 		 * 3: in a string ""
 		 */
+	/*
 		string res = solve(li);
 		li.second = res;
 	}
-
 	//Arbol sintactico del ejemplo 3.56 del libro de Aho
 	//Hojas
 	Node h1('a',1);
@@ -203,6 +215,9 @@ int main() {
 	//cout << p -> right -> simbol << '\n';
 	//printInOrder(root1);
 	cout << '\n';
+	*/
+	string testa = "name", testb = "[0-9]+";
+	cout << "Solve\n" << ' ' << solve(make_pair(testa, testb)) << endl;
 	return 0;
 }
 
