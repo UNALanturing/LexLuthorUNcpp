@@ -127,7 +127,6 @@ string solve(pair<string,string> li){
 	return ans;
 }
 int main() {
-	/*
 	freopen("input.txt", "r", stdin);
 	freopen("parteC.txt", "w", stdout);
 	map <string, string> exp;
@@ -172,18 +171,16 @@ int main() {
 			if (!exp.count(ti)) exp[ti] = ri; //Saves the current lexeme and its regular expression
 		}
 	}
-	*/
 	//fclose(stdout);
 	//Converts Regular extension to regular expension, in order to further process using automatons
 	//cout << "IN" << endl;
-	//for (auto &li : exp) {//For each Lexeme saved
+	for (auto &li : exp) {//For each Lexeme saved
 		/* Cur states
 		 * 0: just a char
 		 * 1: in a expression ()
 		 * 2: in a list []
 		 * 3: in a string ""
 		 */
-	/*
 		string res = solve(li);
 		li.second = res;
 	}
@@ -215,7 +212,6 @@ int main() {
 	//cout << p -> right -> simbol << '\n';
 	//printInOrder(root1);
 	cout << '\n';
-	*/
 	string testa = "name", testb = "[0-9]+";
 	cout << "Solve\n" << ' ' << solve(make_pair(testa, testb)) << endl;
 	return 0;
