@@ -1,0 +1,6 @@
+12381263613
+contador
+var
+PI
+EULER
+103871722
