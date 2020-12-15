@@ -6,7 +6,7 @@ int main(){
 	freopen("input.l", "r", stdin);
 	freopen("output.cpp", "w", stdout);
 	map <string, string> exp;
-	map<string, string> rules;
+	vector<pair<string, string>> rules;
 	string current_line;
 	bool inDeclarations = true;
 	bool inDefinitions = false;
@@ -44,6 +44,7 @@ int main(){
 				if (!exp.count(ti) && ti != "") exp[ti] = ri; //Saves the current lexeme and its regular expression	
 			}
 		}else if(inRules){//Reading rules section.
+			//cout << "CL: " << current_line <<'\n';
 			if(current_line == "%%"){
 				inRules = 0;
 				//cout << "freopen(\"input.txt\", \"r\", stdin);\n";
@@ -55,8 +56,6 @@ int main(){
 				cout << "int num_automatas = " << rules.size() << ";\n";
 				cout << "vector<AFD> automatas;\n";
 				cout << "//Accion ingresada para cada regla:\n";
-				cout << "//Vector para identificar si una accion retorna un entero o no\n";
-				cout << "vector<int> isVoid;\n";
 				int j = 0;
 				for(auto x : rules){
 					if(x.second.find("return") != string::npos){
@@ -72,14 +71,7 @@ int main(){
 				cout << "//Analizador lexico:\n";
 				cout << "vector<pair<int,string>> yylex(){\n";
 				for(auto x : rules){
-					cout << "automatas.push_back( buildAFD( \"" << x.first << "\" ) );\n";
-				}
-				for(auto x : rules){
-					if(x.second.find("return") != string::npos){
-						cout << "isVoid.push_back(0);\n";
-					}else{
-						cout << "isVoid.push_back(1);\n";
-					}
+					cout << "\tautomatas.push_back( buildAFD( \"" << x.first << "\" ) );\n";
 				}
 				cout << "\tstring lexema;\n";
 				cout << "\tvector<pair<int,string>> tokens;\n";
@@ -89,9 +81,13 @@ int main(){
 				j=0;
 				for(auto x : rules){
 					cout << "\t\t"<< (j ? "else ": "") << "if(automatas["<< j <<"].procesarString(lexema)){\n";
-					cout << "\t\t\tif(isVoid["<< j <<"]) action"<< j <<"();\n";
-					cout << "\t\t\telse tokens.push_back({action"<< j++ <<"(), lexema});\n";
+					if(x.second.find("return") == string::npos){
+						cout << "\t\t\taction"<< j <<"();\n";
+					}else{
+						cout << "\t\t\ttokens.push_back({action"<< j <<"(), lexema});\n";
+					}
 					cout << "\t\t}\n";
+					j++;
 				}
 				cout << "\t}\n";
 				cout << "\treturn tokens;\n";
@@ -121,10 +117,11 @@ int main(){
 								def += current_line[i];
 							}
 						}else{
-							if(current_line[i] = '{'){
+							if(current_line[i] == '{'){
 								id = 1;
 								def = "";
 							}else{
+								
 								pattern += current_line[i];
 							}
 						}
@@ -133,7 +130,8 @@ int main(){
 					}
 				}
 				trim(action);
-				if(pattern != "") rules[pattern] = action; //Saves the current lexeme and its regular expression
+				//cout << "P: " << pattern << " A: " << action << '\n';
+				if(pattern != "") rules.push_back(make_pair(pattern, action)); //Saves the current lexeme and its regular expression
 			}
 			
 		}else{//Reading last section
