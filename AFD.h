@@ -1,10 +1,157 @@
 #include<bits/stdc++.h>
-#define LAMBDA '~'
-#define CONCAT '`'
+//#define LAMBDA '~'
+//#define CONCAT '`'
 
 
 
 using namespace std;
+
+const char LAMBDA = '~';
+const char CONCAT = '`';
+
+
+void imp() {cout << "You've made a mistake sir / ma'am" << endl; exit(0);}
+bool change(int i, int n, string &s) {return i + 1 < n && (s[i + 1] == '?' || s[i + 1] == '$' || s[i + 1] == '+'); }
+bool isOperator(char c){
+	return (c == '?'  or c == '-' or c == '*' or c == '\\' or c=='=' or c=='&' or c=='^' or c=='|');
+}
+string solve(pair<string,string> li){
+	string ans = "", s = li.second, last = "";
+	int n = s.size();
+	int inStr = 0;
+	vector < pair<string, int> > st;
+	for (int i = 0; i < n; ++i) {
+		//New expression, list or string
+		if (s[i] == '(') {
+			ans += "(";
+			st.push_back({"", 1});
+		} else if (s[i] == '[') {
+			ans += "(";
+			st.push_back({"", 2});
+		} else if (s[i] == '"') {
+			if (!st.empty() && st.back().second == 3) {
+				if (!change(i, n, s)) {
+					ans += st.back().first;
+					st.pop_back();
+				}
+			} else {
+				ans += "(";
+				st.push_back({"", 3});
+				inStr = 1;
+			}
+		} else {
+			// Ending of an expression or list
+			if(inStr && isOperator(s[i])){
+				string aux = "";
+				aux += "\\";
+				aux += s[i];
+				ans += aux;
+				continue;
+			}
+			/*
+			if(s[i] == '+'){
+				char aux = ans.back();
+				if(aux != ')'){
+					ans += aux + "*";
+				}else{
+					int cnt = 1;
+					int inx = 0;
+					if(i-2 < 0) imp();
+					for(int j=i-2; j>=0; j--){
+						if(ans[j] == ')')cnt++;
+						else if(ans[j] == '(')cnt--;
+						if(cnt == 0){
+							inx = j;
+							break;
+						}
+					}
+					string t = ans.substr(inx,i-1-inx+1);
+					ans += t+"*";
+				}
+				continue;
+			}*/
+			if (s[i] == ')' || s[i] == ']') {
+				if (st.empty()) imp();
+				if (!change(i, n, s)) {
+					ans += st.back().first; 
+					ans += ")";
+					st.pop_back();
+				}
+			} else {
+				//Current element in an operator
+				if (s[i] == '?') {
+					if (!i || ans.empty() || st.empty()) imp();
+					if (!st.empty()) {
+						ans += st.back().first; 
+						ans += "|";
+						ans += LAMBDA;
+						ans += ")";
+						st.pop_back();
+					} else {
+						char c = ans.back();
+						ans += "(" ;
+						ans += LAMBDA; 
+						ans += "|";
+						ans += c;
+						ans += ")";
+					}
+				} else if (s[i] == '$') {
+					if (!i || ans.empty() || st.empty()) imp();
+					if (!st.empty()) {
+						last = st.back().first;
+						st.pop_back();
+					} else last = ans.back();
+				} else if (s[i] == '-') {
+					if (i == 0 || i + 1 >= n) imp();
+					if (st.size()) {
+						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
+							st.back().first += "|";
+							st.back().first += c;
+						}
+					} else {
+						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
+							ans += "|";
+							ans += c;
+						}
+					}
+					i++;
+				}  else if (s[i] == '+') {
+					if (!st.empty()) {
+						ans += "(" ;
+						ans += st.back().first;
+						ans += ")*(";
+						ans += st.back().first;
+						ans += "))";
+						st.pop_back();
+					} else {
+						if (ans.empty()) imp();
+						char c = ans[ans.size() - 1];
+						ans.pop_back();
+						ans += "("; ans += c; 
+						ans += ")*("; ans += c; 
+						ans += "))";
+					}
+				}  else if (s[i] == '\\') {
+					if (i + 1 >= n) imp();
+					ans += s[i + 1];
+					i++;
+
+				} else {
+					if (!st.empty()) {
+						if (st.back().second == 2) {
+							if (i != 0 && s[i - 1] != '[')
+								st.back().first += "|";
+							st.back().first += s[i];
+						} else st.back().first += s[i];
+					} else ans += s[i];
+				}
+			}
+		}
+	}
+	li.second = ans;
+	return ans;
+}
+
 
 struct Node{
   public:
@@ -42,9 +189,6 @@ struct Node{
 
     
 };
-
-
-
 
 bool nullable(Node &n){
   if(n.nullable_computed) return n.nullable;
@@ -387,8 +531,17 @@ Node* parseRegex(string regex){
 				}else throw i;
 			}else{
 				if(root == NULL) root = new Node(regex[i], leaf_index++);
-				else if(regex[i-1] != '|') root = new Node(CONCAT, root, new Node(regex[i], leaf_index++));
-				else root -> right = new Node(regex[i], leaf_index++);
+				else if(regex[i-1] == ')') root = new Node(CONCAT, root, new Node(regex[i], leaf_index++));
+				else if(root -> simbol == '|'){
+					Node *aux = root;
+					while(aux -> right != NULL && aux -> right -> simbol == '|') aux = aux -> right;
+					if(aux -> right == NULL) aux -> right = new Node(regex[i], leaf_index++);
+					else{
+						aux -> right = new Node(CONCAT, aux -> right, new Node(regex[i], leaf_index++));
+					}
+				}else{
+					root = new Node(CONCAT, root, new Node(regex[i], leaf_index++));
+				}
 			}	
 		}
 		if(!s.empty()) throw (int) regex.length();
@@ -399,10 +552,10 @@ Node* parseRegex(string regex){
 };
 
 
+
 AFD buildAFD(string s){
-	//Aplicar acá a s la función que traduce las expresiones regulares!!
-	s += '#';
-	Node* root = parseRegex(s);
+	//string aux = solve(s)//Aplicar acá a s la función que traduce las expresiones regulares!!
+	Node* root = parseRegex("("+(solve(make_pair("",s))+")#"));
 	return AFD(*root);
 }
 
@@ -436,3 +589,4 @@ static inline void trim(std::string &s) {
     ltrim(s);
     rtrim(s);
 };
+
