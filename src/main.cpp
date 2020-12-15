@@ -21,7 +21,7 @@ string solve(pair<string,string> li){
 			ans += "(";
 			st.push_back({"", 2});
 		} else if (s[i] == '"') {
-			if (st.size() && st.back().second == 3) {
+			if (!st.empty() && st.back().second == 3) {
 				if (!change(i, n, s)) {
 					ans += st.back().first;
 					st.pop_back();
@@ -35,8 +35,8 @@ string solve(pair<string,string> li){
 			// Ending of an expression or list
 			if(inStr && isOperator(s[i])){
 				string aux = "";
-				aux.push_back('\\');
-				aux.push_back(s[i]);
+				aux += "\\";
+				aux += s[i];
 				ans += aux;
 				continue;
 			}
@@ -65,25 +65,31 @@ string solve(pair<string,string> li){
 			if (s[i] == ')' || s[i] == ']') {
 				if (st.empty()) imp();
 				if (!change(i, n, s)) {
-					ans += st.back().first + ")";
+					ans += st.back().first; 
+					ans += ")";
 					st.pop_back();
 				}
 			} else {
 				//Current element in an operator
 				if (s[i] == '?') {
 					if (!i || ans.empty() || st.empty()) imp();
-					if (st.size()) {
-						ans += st.back().first + "|" + LAMBDA+ ")";
+					if (!st.empty()) {
+						ans += st.back().first; 
+						ans += "|";
+						ans += LAMBDA;
+						ans += ")";
 						st.pop_back();
 					} else {
 						char c = ans.back();
 						ans += "(" ;
-						ans += LAMBDA + "|";
-						ans += c + ")";
+						ans += LAMBDA; 
+						ans += "|";
+						ans += c;
+						ans += ")";
 					}
 				} else if (s[i] == '$') {
 					if (!i || ans.empty() || st.empty()) imp();
-					if (st.size()) {
+					if (!st.empty()) {
 						last = st.back().first;
 						st.pop_back();
 					} else last = ans.back();
@@ -91,31 +97,37 @@ string solve(pair<string,string> li){
 					if (i == 0 || i + 1 >= n) imp();
 					if (st.size()) {
 						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
-							st.back().first += '|';
+							st.back().first += "|";
 							st.back().first += c;
 						}
 					} else {
 						for (char c = s[i - 1] + 1; c <= s[i + 1]; ++c) {
-							ans += '|';
+							ans += "|";
 							ans += c;
 						}
 					}
 					i++;
 				}  else if (s[i] == '+') {
 					if (!st.empty()) {
-						ans += "(" + st.back().first + ")*(" + st.back().first + "))";
+						ans += "(" ;
+						ans += st.back().first;
+						ans += ")*(";
+						ans += st.back().first;
+						ans += "))";
 						st.pop_back();
 					} else {
-						char c = ans.back();
-						ans += "(" + c; 
-						ans += ")*(" + c; 
+						if (ans.empty()) imp();
+						char c = ans[ans.size() - 1];
+						ans.pop_back();
+						ans += "("; ans += c; 
+						ans += ")*("; ans += c; 
 						ans += "))";
 					}
 				} else {
-					if (st.size()) {
+					if (!st.empty()) {
 						if (st.back().second == 2) {
 							if (i != 0 && s[i - 1] != '[')
-								st.back().first += '|';
+								st.back().first += "|";
 							st.back().first += s[i];
 						} else st.back().first += s[i];
 					} else ans += s[i];
@@ -127,6 +139,7 @@ string solve(pair<string,string> li){
 	return ans;
 }
 int main() {
+	/*
 	freopen("input.txt", "r", stdin);
 	freopen("parteC.txt", "w", stdout);
 	map <string, string> exp;
@@ -171,17 +184,18 @@ int main() {
 			if (!exp.count(ti)) exp[ti] = ri; //Saves the current lexeme and its regular expression
 		}
 	}
-	//fclose(stdout);
+	fclose(stdout);
 	//Converts Regular extension to regular expension, in order to further process using automatons
 	//cout << "IN" << endl;
-	for (auto &li : exp) {//For each Lexeme saved
+	*/
+	//for (auto &li : exp) {//For each Lexeme saved
 		/* Cur states
 		 * 0: just a char
 		 * 1: in a expression ()
 		 * 2: in a list []
 		 * 3: in a string ""
 		 */
-		string res = solve(li);
+		/*string res = solve(li);
 		li.second = res;
 	}
 	//Arbol sintactico del ejemplo 3.56 del libro de Aho
@@ -212,8 +226,9 @@ int main() {
 	//cout << p -> right -> simbol << '\n';
 	//printInOrder(root1);
 	cout << '\n';
-	string testa = "name", testb = "[0-9]+";
-	cout << "Solve\n" << ' ' << solve(make_pair(testa, testb)) << endl;
+	*/
+	string testa = "name", testb = "A+";
+	cout << "Solve" << endl << solve(make_pair(testa, testb)) << endl;
 	return 0;
 }
 
