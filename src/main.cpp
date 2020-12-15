@@ -123,6 +123,11 @@ string solve(pair<string,string> li){
 						ans += ")*("; ans += c; 
 						ans += "))";
 					}
+				}  else if (s[i] == '\\') {
+					if (i + 1 >= n) imp();
+					ans += s[i + 1];
+					i++;
+
 				} else {
 					if (!st.empty()) {
 						if (st.back().second == 2) {
@@ -227,7 +232,7 @@ int main() {
 	//printInOrder(root1);
 	cout << '\n';
 	*/
-	string testa = "name", testb = "A+";
+	string testa = "name", testb = "A\\+";
 	cout << "Solve" << endl << solve(make_pair(testa, testb)) << endl;
 	return 0;
 }
