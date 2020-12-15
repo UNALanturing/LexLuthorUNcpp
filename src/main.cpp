@@ -232,7 +232,7 @@ int main() {
 	//printInOrder(root1);
 	cout << '\n';
 	*/
-	string testa = "name", testb = "A\\+";
+	string testa = "name", testb = "[\\+\\-\\x\\/]";
 	cout << "Solve" << endl << solve(make_pair(testa, testb)) << endl;
 	return 0;
 }
