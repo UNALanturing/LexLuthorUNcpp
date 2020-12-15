@@ -1,22 +1,30 @@
 %{
-#include<bits/stdc++.h>
-using namespace std;
+//*****PARTE EN C++*****
+#include <bits/stdc++.h>
+#define NOMBRE 600
+#define PATRONOMICO_HOMBRE 601
+#define PATRONOMICO_MUJER 602
+void showError();
 
+using namespace std;
 %}
+
+nombre [A-Z][a-z]+
 
 %%
 
-is|am|are|were|was|be|being|been|do|does|did|will|would|should|can|could|has|have|had|go {cout << yytext << ": is a verb\n";}
-very|simply|gently|quietly|calmly|angrily {cout << yytext << ": is an adverb\n";}
-to|from|behind|above|below|between|below {cout << yytext << ": is a preposition\n";}
-if|then|and|but|or {cout << yytext << ": is a conjunction\n";}
-their|my|your|his|her|its {cout << yytext << ": is a adjective\n";}
-I|you|he|she|we|they {cout << yytext << ": is a pronoun\n";}
-[a-zA-Z]+ {cout << yytext << ": don't recognize, might be a noun\n";}
-
+{nombre}vich {return (PATRONOMICO_HOMBRE);}
+{nombre}oba {return (PATRONOMICO_MUJER);}
+{nombre} {return(NOMBRE);}
 %%
 
 int main(){
 	freopen("input.txt", "r", stdin);
-	yylex();
+	for(auto x: yylex()){
+		cout << x.first << " " << x.second << '\n';
+	}
+}
+
+void showError(){
+    printf("Other input");
 }
